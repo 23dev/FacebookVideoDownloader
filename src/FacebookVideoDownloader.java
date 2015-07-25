@@ -16,6 +16,10 @@ import com.gargoylesoftware.htmlunit.FailingHttpStatusCodeException;
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
 
+/**
+ * @author 23dev
+ *
+ */
 public class FacebookVideoDownloader {
 
 	private String url;
@@ -26,14 +30,9 @@ public class FacebookVideoDownloader {
 		getMobileUrl(url);
 	}
 
-	public void getVideo() {
-		try {
-			getPageSourceAfterJs();
-			getMP4Link();
-		} catch (FailingHttpStatusCodeException | IOException e) {
-			e.printStackTrace();
-		}
-		// System.out.println("Resultat : " + decodedMP4Link);
+	public void setForDownload() throws FailingHttpStatusCodeException, MalformedURLException, IOException {
+		getPageSourceAfterJs();
+		getMP4Link();
 	}
 
 	public void getPageSourceAfterJs() throws FailingHttpStatusCodeException, MalformedURLException, IOException {
@@ -48,13 +47,12 @@ public class FacebookVideoDownloader {
 		savePageSourceAfterJs(pageAsXml);
 	}
 
-	
-	private void savePageSourceAfterJs(String src) { 
+	private void savePageSourceAfterJs(String src) {
 		try {
 			PrintWriter out = new PrintWriter("site.html");
 			out.println(src);
 			out.close();
-		} catch (FileNotFoundException e) { 
+		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		}
 	}
@@ -64,7 +62,6 @@ public class FacebookVideoDownloader {
 	}
 
 	public void getMP4Link() throws IOException {
-		// Mkyong
 		BufferedReader br = null;
 
 		try {
@@ -95,11 +92,17 @@ public class FacebookVideoDownloader {
 		}
 	}
 
-	public void downloadMP4() throws MalformedURLException, IOException {
+	public void downloadMP4(String filename) throws MalformedURLException, IOException {
 		URLConnection conn = new URL(decodedMP4Link).openConnection();
 		InputStream is = conn.getInputStream();
 
-		OutputStream outstream = new FileOutputStream(new File("video.mp4"));
+		OutputStream outstream;
+		if (filename.endsWith(".mp4")) {
+			outstream = new FileOutputStream(new File(filename));
+		} else {
+			outstream = new FileOutputStream(new File(filename + ".mp4"));
+		}
+
 		byte[] buffer = new byte[4096];
 		int len;
 		while ((len = is.read(buffer)) > 0) {
